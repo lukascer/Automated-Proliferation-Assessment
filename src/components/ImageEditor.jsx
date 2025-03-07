@@ -1,3 +1,4 @@
+import CropIcon from '@mui/icons-material/Crop';
 import React, { useEffect, useRef, useState } from 'react';
 import { Circle, Group, Image, Layer, Line, Stage, Transformer } from 'react-konva';
 import exampleImage from './../assets/6246_23_A_Ki67.png';
@@ -7,11 +8,13 @@ const ImageEditor = () => {
   const stageRef = useRef(null);
   const imageRef = useRef(null);
   const transformerRef = useRef(null);
+
   const [img, setImg] = useState(null);
   const [polygonPoints, setPolygonPoints] = useState([]);
   const [zoom, setZoom] = useState(1);
   const [stageDimensions, setStageDimensions] = useState({ width: 800, height: 600 });
   const [imagePosition, setImagePosition] = useState({ x: 0, y: 0 });
+  const [isCropping, setIsCropping] = useState(false);
 
   // Update stage dimensions based on container size
   useEffect(() => {
@@ -21,12 +24,9 @@ const ImageEditor = () => {
         setStageDimensions({ width, height: 600 });
       }
     };
-
     updateDimensions();
     window.addEventListener('resize', updateDimensions);
-    return () => {
-      window.removeEventListener('resize', updateDimensions);
-    };
+    return () => window.removeEventListener('resize', updateDimensions);
   }, []);
 
   // Load the image
@@ -38,12 +38,11 @@ const ImageEditor = () => {
     };
   }, []);
 
-  // Compute initial zoom and center the image once image and stage dimensions are loaded
+  // Compute initial zoom and center the image on load
   useEffect(() => {
     if (img && stageDimensions.width && stageDimensions.height) {
       const initialScale = Math.min(stageDimensions.width / img.width, stageDimensions.height / img.height);
       setZoom(initialScale);
-      // Calculate position to center the image in the stage's unscaled coordinate space
       const x = (stageDimensions.width / initialScale - img.width) / 2;
       const y = (stageDimensions.height / initialScale - img.height) / 2;
       setImagePosition({ x, y });
@@ -58,53 +57,130 @@ const ImageEditor = () => {
     }
   }, [img]);
 
-  // Add a point to the polygon if clicking on the stage (not on the image)
+  // When cropping mode is active, record polygon points on stage clicks
   const handleStageClick = (e) => {
+    if (!isCropping) return;
     if (e.target === e.target.getStage()) {
       const stage = e.target.getStage();
       const point = stage.getPointerPosition();
-      setPolygonPoints([...polygonPoints, point]);
-    }
-  };
-
-  // Clipping function based on polygon points
-  const clipFunction = (ctx) => {
-    if (polygonPoints.length > 0) {
-      ctx.beginPath();
-      ctx.moveTo(polygonPoints[0].x, polygonPoints[0].y);
-      for (let i = 1; i < polygonPoints.length; i++) {
-        ctx.lineTo(polygonPoints[i].x, polygonPoints[i].y);
-      }
-      ctx.closePath();
-    }
-  };
-
-  // Export the stage as an image (hiding the transformer during export)
-  const handleCrop = () => {
-    if (stageRef.current) {
-      transformerRef.current.hide();
-      transformerRef.current.getLayer().batchDraw();
-
-      const dataURL = stageRef.current.toDataURL({ pixelRatio: 3 });
-      window.open(dataURL);
-
-      transformerRef.current.show();
-      transformerRef.current.getLayer().batchDraw();
+      setPolygonPoints((prev) => [...prev, point]);
     }
   };
 
   // Handle zoom slider change
   const handleZoomChange = (e) => {
-    const newZoom = parseFloat(e.target.value);
-    setZoom(newZoom);
+    setZoom(parseFloat(e.target.value));
+  };
+
+  // Handle mouse wheel zoom
+  const handleWheel = (e) => {
+    e.evt.preventDefault();
+    const stage = stageRef.current;
+    const oldScale = stage.scaleX();
+    const pointer = stage.getPointerPosition();
+    const scaleBy = 1.05;
+    const direction = e.evt.deltaY > 0 ? -1 : 1;
+    const newScale = direction > 0 ? oldScale * scaleBy : oldScale / scaleBy;
+    setZoom(newScale);
+    const mousePointTo = {
+      x: (pointer.x - stage.x()) / oldScale,
+      y: (pointer.y - stage.y()) / oldScale,
+    };
+    const newPos = {
+      x: pointer.x - mousePointTo.x * newScale,
+      y: pointer.y - mousePointTo.y * newScale,
+    };
+    stage.position(newPos);
+    stage.batchDraw();
+  };
+
+  // Compute bounding box from polygon points, clamp to image boundaries, and crop
+  const performCrop = () => {
+    if (polygonPoints.length === 0) {
+      alert('No crop area defined!');
+      return;
+    }
+    // Compute bounding box of drawn polygon (in stage coordinates)
+    const xs = polygonPoints.map((p) => p.x);
+    const ys = polygonPoints.map((p) => p.y);
+    const minX = Math.min(...xs);
+    const minY = Math.min(...ys);
+    const maxX = Math.max(...xs);
+    const maxY = Math.max(...ys);
+
+    // Image boundaries in stage coordinates
+    const imageLeft = imagePosition.x;
+    const imageTop = imagePosition.y;
+    const imageRight = imagePosition.x + img.width;
+    const imageBottom = imagePosition.y + img.height;
+
+    // Clamp the crop region so it doesn't exceed the image boundaries
+    const clampedMinX = Math.max(minX, imageLeft);
+    const clampedMinY = Math.max(minY, imageTop);
+    const clampedMaxX = Math.min(maxX, imageRight);
+    const clampedMaxY = Math.min(maxY, imageBottom);
+    const cropWidth = clampedMaxX - clampedMinX;
+    const cropHeight = clampedMaxY - clampedMinY;
+
+    console.log({
+      minX,
+      minY,
+      maxX,
+      maxY,
+      clampedMinX,
+      clampedMinY,
+      clampedMaxX,
+      clampedMaxY,
+      cropWidth,
+      cropHeight,
+    });
+
+    if (cropWidth <= 0 || cropHeight <= 0) {
+      alert('Invalid crop area!');
+      return;
+    }
+
+    // Hide transformer handles before cropping
+    if (transformerRef.current) {
+      transformerRef.current.hide();
+      transformerRef.current.getLayer().batchDraw();
+    }
+
+    // Crop using stage.toDataURL with the clamped region (coordinates in stage space)
+    const dataURL = stageRef.current.toDataURL({
+      x: clampedMinX,
+      y: clampedMinY,
+      width: cropWidth,
+      height: cropHeight,
+      pixelRatio: 3,
+    });
+    window.open(dataURL);
+
+    if (transformerRef.current) {
+      transformerRef.current.show();
+      transformerRef.current.getLayer().batchDraw();
+    }
+  };
+
+  // Toggle cropping mode:
+  // • If not in cropping mode, clear any existing polygon points and enable mode.
+  // • If in cropping mode, perform the crop and exit cropping mode.
+  const toggleCropping = () => {
+    if (!isCropping) {
+      setPolygonPoints([]);
+      setIsCropping(true);
+    } else {
+      performCrop();
+      setIsCropping(false);
+    }
   };
 
   return (
     <div ref={containerRef} style={{ width: '100%' }}>
       <div style={{ marginBottom: '10px' }}>
         <label>Zoom: </label>
-        <input type="range" min="0.1" max="2" step="0.01" value={zoom} onChange={handleZoomChange} />
-        <span>{zoom}</span>
+        <input type="range" min="0.1" max="5" step="0.01" value={zoom} onChange={handleZoomChange} />
+        <span>{zoom.toFixed(2)}</span>
       </div>
       <Stage
         width={stageDimensions.width}
@@ -113,16 +189,16 @@ const ImageEditor = () => {
         scaleX={zoom}
         scaleY={zoom}
         onClick={handleStageClick}
+        onWheel={handleWheel}
         style={{ border: '1px solid grey' }}
       >
         <Layer>
-          {/* Group applies clipping if polygonPoints exist */}
-          <Group clipFunc={polygonPoints.length > 0 ? clipFunction : undefined}>
+          {/* The image is drawn with an offset (imagePosition) */}
+          <Group>
             <Image image={img} x={imagePosition.x} y={imagePosition.y} draggable ref={imageRef} />
           </Group>
-          {/* Transformer for resizing/moving the image */}
           <Transformer ref={transformerRef} />
-          {/* Visualization of the slicing polygon */}
+          {/* Visualize the drawn crop polygon */}
           {polygonPoints.length > 0 && (
             <Line points={polygonPoints.flatMap((p) => [p.x, p.y])} stroke="red" strokeWidth={2} closed={false} />
           )}
@@ -131,8 +207,20 @@ const ImageEditor = () => {
           ))}
         </Layer>
       </Stage>
-      <button onClick={handleCrop} style={{ marginTop: '10px' }}>
-        Crop Image
+      {/* MUI Crop Icon Button to toggle cropping mode */}
+      <button
+        onClick={toggleCropping}
+        style={{
+          marginTop: '10px',
+          display: 'flex',
+          alignItems: 'center',
+          padding: '5px 10px',
+          fontSize: '16px',
+          cursor: 'pointer',
+        }}
+      >
+        <CropIcon style={{ marginRight: '5px' }} />
+        {isCropping ? 'Apply Crop' : 'Start Cropping'}
       </button>
     </div>
   );
