@@ -1,0 +1,101 @@
+/* Global container for responsive layout */
+#root {
+  max-width: 1280px; /* Maximum width for larger screens */
+  margin: 0 auto; /* Center the container */
+  padding: 2rem; /* Default padding */
+  text-align: center; /* Center text by default */
+}
+
+/* Adjust padding for various screen sizes */
+@media (max-width: 1280px) {
+  #root {
+    padding: 1.5rem;
+  }
+}
+
+@media (max-width: 768px) {
+  #root {
+    padding: 1rem;
+  }
+}
+
+@media (max-width: 480px) {
+  #root {
+    padding: 0.5rem;
+    text-align: left; /* Left-align text on very small screens */
+  }
+}
+
+/* Logo styling (existing code) */
+.logo {
+  height: 6em;
+  padding: 1.5em;
+  will-change: filter;
+  transition: filter 300ms;
+}
+
+.logo:hover {
+  filter: drop-shadow(0 0 2em #646cffaa);
+}
+
+.logo.react:hover {
+  filter: drop-shadow(0 0 2em #61dafbaa);
+}
+
+/* Keyframes for spinning logo animation */
+@keyframes logo-spin {
+  from {
+    transform: rotate(0deg);
+  }
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+/* Apply spinning animation if user allows motion */
+@media (prefers-reduced-motion: no-preference) {
+  a:nth-of-type(2) .logo {
+    animation: logo-spin infinite 20s linear;
+  }
+}
+
+/* Card styles for content containers */
+.card {
+  padding: 2em;
+  margin: 1rem auto; /* Center cards with margin */
+  max-width: 600px; /* Limit the card width */
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1); /* Subtle shadow for depth */
+  border-radius: 8px; /* Rounded corners */
+}
+
+/* Additional text styling */
+.read-the-docs {
+  color: #888;
+}
+
+/* Layout for app container, sidebar, and main content */
+.app-container {
+  display: flex;
+  flex-direction: row; /* Default layout: sidebar next to main content */
+}
+
+/* For smaller screens, stack the sidebar under the main content */
+@media (max-width: 768px) {
+  .app-container {
+    flex-direction: column;
+  }
+}
+
+/* Sidebar styles for navigation or additional info */
+.sidebar {
+  width: 240px; /* Fixed width for sidebar */
+  flex-shrink: 0;
+  background: #fafafa; /* Light background color */
+  padding: 1rem;
+}
+
+/* Main content area styles */
+.main-content {
+  flex-grow: 1;
+  padding: 1rem;
+}
