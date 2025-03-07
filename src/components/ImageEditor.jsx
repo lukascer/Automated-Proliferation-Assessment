@@ -11,6 +11,7 @@ const ImageEditor = () => {
   const [polygonPoints, setPolygonPoints] = useState([]);
   const [zoom, setZoom] = useState(1);
   const [stageDimensions, setStageDimensions] = useState({ width: 800, height: 600 });
+  const [imagePosition, setImagePosition] = useState({ x: 0, y: 0 });
 
   // Update stage dimensions based on container size
   useEffect(() => {
@@ -37,11 +38,15 @@ const ImageEditor = () => {
     };
   }, []);
 
-  // Once the image and stage dimensions are loaded, compute an initial zoom
+  // Compute initial zoom and center the image once image and stage dimensions are loaded
   useEffect(() => {
     if (img && stageDimensions.width && stageDimensions.height) {
       const initialScale = Math.min(stageDimensions.width / img.width, stageDimensions.height / img.height);
       setZoom(initialScale);
+      // Calculate position to center the image in the stage's unscaled coordinate space
+      const x = (stageDimensions.width / initialScale - img.width) / 2;
+      const y = (stageDimensions.height / initialScale - img.height) / 2;
+      setImagePosition({ x, y });
     }
   }, [img, stageDimensions]);
 
@@ -53,7 +58,7 @@ const ImageEditor = () => {
     }
   }, [img]);
 
-  // Add a point to the polygon if clicking on the stage (not the image)
+  // Add a point to the polygon if clicking on the stage (not on the image)
   const handleStageClick = (e) => {
     if (e.target === e.target.getStage()) {
       const stage = e.target.getStage();
@@ -113,7 +118,7 @@ const ImageEditor = () => {
         <Layer>
           {/* Group applies clipping if polygonPoints exist */}
           <Group clipFunc={polygonPoints.length > 0 ? clipFunction : undefined}>
-            <Image image={img} x={0} y={0} draggable ref={imageRef} />
+            <Image image={img} x={imagePosition.x} y={imagePosition.y} draggable ref={imageRef} />
           </Group>
           {/* Transformer for resizing/moving the image */}
           <Transformer ref={transformerRef} />
