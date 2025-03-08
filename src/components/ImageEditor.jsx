@@ -1,4 +1,7 @@
+import AttachEmailIcon from '@mui/icons-material/AttachEmail';
+import CloudDownloadIcon from '@mui/icons-material/CloudDownload';
 import CropIcon from '@mui/icons-material/Crop';
+import PlaceIcon from '@mui/icons-material/Place';
 import { Box, Button } from '@mui/material';
 import React, { useEffect, useRef, useState } from 'react';
 import { Circle, Group, Image, Layer, Line, Stage, Transformer } from 'react-konva';
@@ -223,6 +226,12 @@ const ImageEditor = () => {
             <CropIcon style={{ marginRight: '5px' }} />
             {isCropping ? 'Apply Crop' : 'Start Cropping'}
           </button>
+
+          <Box sx={{ mb: '5px' }}>
+            <PlaceIcon fontSize="large" sx={{ mb: '2px' }} />
+            <AttachEmailIcon fontSize="large" sx={{ ml: 1.2 }} />
+            <CloudDownloadIcon fontSize="large" sx={{ mb: '1px', ml: 2 }} />
+          </Box>
         </Box>
 
         {!img ? (
