@@ -6,12 +6,12 @@ const drawerWidth = 170;
 
 const Sidebar = () => {
   const navigacniPolozky = [
-    { text: 'Domů', path: '/homepage' },
-    { text: 'Dashboard', path: '/dashboard' },
-    { text: 'Profil pacienta', path: '/profil' },
-    { text: 'Senzorová data', path: '/senzorova-data' },
-    { text: 'Notifikace', path: '/notifikace' },
-    { text: 'Nastavení', path: '/nastaveni' },
+    { text: 'Evaluation', path: '/homepage' },
+    // { text: 'Dashboard', path: '/dashboard' },
+    { text: 'Patient profile', path: '/profil' },
+    // { text: 'Senzorová data', path: '/senzorova-data' },
+    // { text: 'Notifikace', path: '/notifikace' },
+    // { text: 'Nastavení', path: '/nastaveni' },
     { text: 'Image editor', path: '/image-editor' },
   ];
 

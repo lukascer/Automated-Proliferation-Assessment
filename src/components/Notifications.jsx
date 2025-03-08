@@ -1,19 +1,19 @@
+import { Card, CardContent, List, ListItem, ListItemText, Typography } from '@mui/material';
 import React from 'react';
-import { Box, Card, CardContent, Typography, List, ListItem, ListItemText } from '@mui/material';
 
 const Notifications = () => {
   // Příkladová data notifikací
   const notifications = [
-    { id: 1, message: 'Vysoká hladina glukózy detekována. Kontaktujte lékaře.' },
-    { id: 2, message: 'Nové měření krevního tlaku je k dispozici.' },
-    { id: 3, message: 'Aktualizace profilu pacienta dokončena.' }
+    { id: 1, message: 'Organ donor.' },
+    { id: 2, message: 'Previous sample available.' },
+    { id: 3, message: 'New sample available.' },
   ];
 
   return (
     <Card sx={{ m: 2, p: 2 }}>
       <CardContent>
         <Typography variant="h5" sx={{ mb: 2 }}>
-          Notifikace
+          Notification
         </Typography>
         <List>
           {notifications.map((notification) => (
