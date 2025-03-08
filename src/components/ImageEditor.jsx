@@ -176,7 +176,7 @@ const ImageEditor = () => {
     // Convert the dataURL to a Blob and then create a Blob URL.
     const blob = dataURLToBlob(dataURL);
     const blobUrl = URL.createObjectURL(blob);
-    window.open(blobUrl);
+    // window.open(blobUrl);
 
     setCroppedImage(blobUrl);
   };
