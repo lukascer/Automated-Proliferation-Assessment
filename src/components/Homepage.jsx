@@ -22,15 +22,19 @@ const sampleMeasurementInfo = {
 };
 
 const sampleMeasurements = [
-  { id: 'ratio', parameter: 'Cells ratio', value: 80, unit: '%' },
-  { id: 'distribution', parameter: 'Distribution', value: 'center', unit: '' },
-  { id: 'size', parameter: 'Distribution size', value: 5, unit: 'mm2' },
+  { id: 'positive', parameter: 'Positive cells', value: 80, unit: 80 },
+  { id: 'mild_active', parameter: '+ Mild Positive', value: 15, unit: 15 },
+  { id: 'moderate_active', parameter: '+ Moderate Positive', value: 21, unit: 21 },
+  { id: 'strong_active', parameter: '+ Strong Positive', value: 40, unit: 40 },
+  { id: 'negative', parameter: 'Negative cells', value: 53, unit: 53 },
 ];
 
 const thresholdValues = {
-  ratio: { min: 20, max: 50 },
-  distribution: { min: 50, max: 150 },
-  size: { min: 0, max: 2 },
+  positive: { min: 20, max: 50 },
+  mild_active: { min: 0, max: 30 },
+  moderate_active: { min: 0, max: 30 },
+  strong_active: { min: 0, max: 30 },
+  negative: 53,
 };
 
 const checkTreshold = (id, value) => {
@@ -94,8 +98,8 @@ const Homepage = () => {
               <TableHead>
                 <TableRow>
                   <TableCell>Parameter</TableCell>
-                  <TableCell align="right">Value</TableCell>
-                  <TableCell align="right">Unit</TableCell>
+                  <TableCell align="right">No. of cells</TableCell>
+                  <TableCell align="right">Ratio (%)</TableCell>
                 </TableRow>
               </TableHead>
               <TableBody>

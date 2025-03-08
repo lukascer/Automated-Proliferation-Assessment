@@ -1,6 +1,7 @@
 import { Box, Drawer, List, ListItem, ListItemButton, ListItemText } from '@mui/material';
 import React from 'react';
 import { Link } from 'react-router-dom';
+import { useSidebar } from './SidebarContext';
 
 const drawerWidth = 170;
 
@@ -15,9 +16,19 @@ const Sidebar = () => {
     { text: 'Image editor', path: '/image-editor' },
   ];
 
+  const { openSidebar, setOpenSidebar } = useSidebar();
+
+  const toggleDrawer = (newOpen) => () => {
+    setOpenSidebar(newOpen);
+  };
+
+  console.log('openSidebar: ', openSidebar);
+
   return (
     <Drawer
       variant="permanent"
+      open={openSidebar}
+      onClose={toggleDrawer(false)}
       PaperProps={{
         sx: {
           width: drawerWidth,

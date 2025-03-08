@@ -1,9 +1,10 @@
 import CropIcon from '@mui/icons-material/Crop';
-import { Box } from '@mui/material';
+import { Box, Button } from '@mui/material';
 import React, { useEffect, useRef, useState } from 'react';
 import { Circle, Group, Image, Layer, Line, Stage, Transformer } from 'react-konva';
 import DetailPreview from './DetailPreview';
 import ImageUpload from './ImageUpload';
+import { useSidebar } from './SidebarContext';
 
 const ImageEditor = () => {
   const containerRef = useRef(null);
@@ -194,10 +195,13 @@ const ImageEditor = () => {
     }
   };
 
+  const { setOpenSidebar } = useSidebar();
+
   return (
     <Box>
       <Box ref={containerRef} sx={{ width: '100%' }}>
         <Box sx={{ display: 'flex', gap: '20px', alignContent: 'center', alignItems: 'center' }}>
+          <Button onClick={() => setOpenSidebar((prev) => !prev)}>Toggle Sidebar</Button>
           <Box sx={{ marginBottom: '10px' }}>
             <label>Zoom: </label>
             <input type="range" min="0.1" max="5" step="0.01" value={zoom} onChange={handleZoomChange} />

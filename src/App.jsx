@@ -1,8 +1,8 @@
 import { Box } from '@mui/material';
-import React from 'react';
+import React, { useEffect } from 'react';
 import { Route, Routes } from 'react-router-dom';
+import api from './api';
 import Dashboard from './components/Dashboard';
-import Header from './components/Header';
 import Homepage from './components/Homepage';
 import ImageEditor from './components/ImageEditor';
 import Notifications from './components/Notifications';
@@ -12,6 +12,20 @@ import Settings from './components/Settings';
 import Sidebar from './components/Sidebar';
 
 function App() {
+  useEffect(() => {
+    api
+      .post('/detect_objects', {
+        firstName: 'Fred',
+        lastName: 'Flintstone',
+      })
+      .then(function (response) {
+        console.log(response.data);
+      })
+      .catch(function (error) {
+        console.log(error);
+      });
+  }, []);
+
   return (
     <Box
       sx={{
@@ -32,9 +46,9 @@ function App() {
         },
       }}
     >
-      <Box sx={{ gridArea: 'header', zIndex: 2 }}>
+      {/* <Box sx={{ gridArea: 'header', zIndex: 2 }}>
         <Header />
-      </Box>
+      </Box> */}
       <Box sx={{ gridArea: 'sidebar', overflowY: 'auto' }}>
         <Sidebar />
       </Box>
