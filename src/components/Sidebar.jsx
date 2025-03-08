@@ -2,7 +2,7 @@ import { Box, Drawer, List, ListItem, ListItemButton, ListItemText } from '@mui/
 import React from 'react';
 import { Link } from 'react-router-dom';
 
-const drawerWidth = 240;
+const drawerWidth = 170;
 
 const Sidebar = () => {
   const navigacniPolozky = [
@@ -23,6 +23,9 @@ const Sidebar = () => {
           width: drawerWidth,
           boxSizing: 'border-box',
           position: 'relative',
+          backgroundColor: '#0d151c',
+          color: 'white',
+          borderLeft: '1px solid white',
         },
       }}
       sx={{

@@ -88,7 +88,7 @@
 
 /* Sidebar styles for navigation or additional info */
 .sidebar {
-  width: 240px; /* Fixed width for sidebar */
+  width: 170px; /* Fixed width for sidebar */
   flex-shrink: 0;
   background: #fafafa; /* Light background color */
   padding: 1rem;

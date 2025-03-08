@@ -17,7 +17,7 @@ function App() {
       sx={{
         display: 'grid',
         height: '100vh',
-        gridTemplateColumns: { xs: '1fr', md: '240px 1fr' },
+        gridTemplateColumns: { xs: '1fr', md: '170px 1fr' },
         gridTemplateRows: { xs: 'auto auto auto', md: 'auto minmax(0, 1fr)' },
         gridTemplateAreas: {
           xs: `
