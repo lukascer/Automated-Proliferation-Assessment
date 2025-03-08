@@ -15,7 +15,7 @@ const ImageEditor = () => {
   const [polygonPoints, setPolygonPoints] = useState([]);
   const [zoom, setZoom] = useState(1);
   const [stageDimensions, setStageDimensions] = useState({ width: 800, height: 600 });
-  // imagePosition holds the group's absolute position (initial centering).
+  // imagePosition holds the group's absolute position.
   const [imagePosition, setImagePosition] = useState({ x: 0, y: 0 });
   const [isCropping, setIsCropping] = useState(false);
 
@@ -61,7 +61,7 @@ const ImageEditor = () => {
     }
   }, [img]);
 
-  // When cropping mode is active, record polygon points in the Group’s local coordinate system.
+  // When cropping mode is active, record polygon points in the Group’s local coordinates.
   const handleStageClick = (e) => {
     if (!isCropping) return;
     const stage = e.target.getStage();
@@ -100,8 +100,7 @@ const ImageEditor = () => {
     stage.batchDraw();
   };
 
-  // Compute bounding box from polygon points (local coordinates), clamp it to image boundaries,
-  // then convert that bounding box to stage coordinates using the group's absolute transform.
+  // Compute bounding box from polygon points (local coordinates), create a clipping mask on an offscreen canvas, and crop.
   const performCrop = () => {
     if (polygonPoints.length === 0) {
       alert('No crop area defined!');
@@ -113,49 +112,34 @@ const ImageEditor = () => {
     const minY = Math.min(...ys);
     const maxX = Math.max(...xs);
     const maxY = Math.max(...ys);
-
-    // Clamp to image boundaries (local coordinates).
-    const clampedMinX = Math.max(minX, 0);
-    const clampedMinY = Math.max(minY, 0);
-    const clampedMaxX = Math.min(maxX, img.width);
-    const clampedMaxY = Math.min(maxY, img.height);
-    const cropWidth = clampedMaxX - clampedMinX;
-    const cropHeight = clampedMaxY - clampedMinY;
+    const cropWidth = maxX - minX;
+    const cropHeight = maxY - minY;
 
     if (cropWidth <= 0 || cropHeight <= 0) {
       alert('Invalid crop area!');
       return;
     }
 
-    // Convert the top-left corner from local (group) coordinates to stage coordinates.
-    const groupTransform = groupRef.current.getAbsoluteTransform();
-    const topLeft = groupTransform.point({ x: clampedMinX, y: clampedMinY });
+    // Create an offscreen canvas.
+    const canvas = document.createElement('canvas');
+    canvas.width = cropWidth;
+    canvas.height = cropHeight;
+    const ctx = canvas.getContext('2d');
 
-    console.log({
-      local: { minX, minY, maxX, maxY, cropWidth, cropHeight },
-      clamped: { clampedMinX, clampedMinY, clampedMaxX, clampedMaxY },
-      absolute: topLeft,
-    });
-
-    // Hide transformer handles before cropping.
-    if (transformerRef.current) {
-      transformerRef.current.hide();
-      transformerRef.current.getLayer().batchDraw();
+    // Create a clipping path using the crop polygon (adjusting for the bounding box offset).
+    ctx.beginPath();
+    ctx.moveTo(polygonPoints[0].x - minX, polygonPoints[0].y - minY);
+    for (let i = 1; i < polygonPoints.length; i++) {
+      ctx.lineTo(polygonPoints[i].x - minX, polygonPoints[i].y - minY);
     }
+    ctx.closePath();
+    ctx.clip();
 
-    const dataURL = stageRef.current.toDataURL({
-      x: topLeft.x,
-      y: topLeft.y,
-      width: cropWidth,
-      height: cropHeight,
-      pixelRatio: 3,
-    });
+    // Draw the image onto the canvas; offset by -minX and -minY.
+    ctx.drawImage(img, -minX, -minY);
+
+    const dataURL = canvas.toDataURL('image/png');
     window.open(dataURL);
-
-    if (transformerRef.current) {
-      transformerRef.current.show();
-      transformerRef.current.getLayer().batchDraw();
-    }
   };
 
   // Toggle cropping mode:
@@ -189,7 +173,8 @@ const ImageEditor = () => {
         style={{ border: '1px solid grey' }}
       >
         <Layer>
-          {/* The image and crop polygon are inside a draggable Group. */}
+          {/* The Group for the image and crop polygon is draggable.
+              Its onDragEnd updates imagePosition, and all crop points are stored relative to it. */}
           <Group
             ref={groupRef}
             x={imagePosition.x}
@@ -200,9 +185,9 @@ const ImageEditor = () => {
             }}
           >
             <Image image={img} x={0} y={0} ref={imageRef} />
-            {/* Draw the crop polygon inside the group */}
+            {/* Render the crop polygon inside the group, with closed path visualization */}
             {polygonPoints.length > 0 && (
-              <Line points={polygonPoints.flatMap((p) => [p.x, p.y])} stroke="red" strokeWidth={2} closed={false} />
+              <Line points={polygonPoints.flatMap((p) => [p.x, p.y])} stroke="red" strokeWidth={2} closed={true} />
             )}
             {polygonPoints.map((point, index) => (
               <Circle key={index} x={point.x} y={point.y} radius={4} fill="blue" />
