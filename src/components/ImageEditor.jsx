@@ -1,7 +1,9 @@
 import CropIcon from '@mui/icons-material/Crop';
+import { Box } from '@mui/material';
 import React, { useEffect, useRef, useState } from 'react';
 import { Circle, Group, Image, Layer, Line, Stage, Transformer } from 'react-konva';
 import exampleImage from './../assets/6246_23_A_Ki67.png';
+import DetailPreview from './DetailPreview';
 
 const ImageEditor = () => {
   const containerRef = useRef(null);
@@ -18,6 +20,8 @@ const ImageEditor = () => {
   // imagePosition holds the group's absolute position.
   const [imagePosition, setImagePosition] = useState({ x: 0, y: 0 });
   const [isCropping, setIsCropping] = useState(false);
+
+  const [croppedImage, setCroppedImage] = useState(null);
 
   // Update stage dimensions based on container size.
   useEffect(() => {
@@ -155,6 +159,8 @@ const ImageEditor = () => {
     const blob = dataURLToBlob(dataURL);
     const blobUrl = URL.createObjectURL(blob);
     window.open(blobUrl);
+
+    setCroppedImage(blobUrl);
   };
 
   // Toggle cropping mode:
@@ -170,67 +176,93 @@ const ImageEditor = () => {
     }
   };
 
+  // useEffect(() => {
+
+  // }, [croppedImage])
+
   return (
-    <div ref={containerRef} style={{ width: '100%' }}>
-      <div style={{ marginBottom: '10px' }}>
-        <label>Zoom: </label>
-        <input type="range" min="0.1" max="5" step="0.01" value={zoom} onChange={handleZoomChange} />
-        <span>{zoom.toFixed(2)}</span>
-      </div>
-      <Stage
-        width={stageDimensions.width}
-        height={stageDimensions.height}
-        ref={stageRef}
-        scaleX={zoom}
-        scaleY={zoom}
-        onClick={handleStageClick}
-        onWheel={handleWheel}
-        style={{ border: '1px solid grey' }}
-      >
-        <Layer>
-          {/* The Group for the image and crop polygon is draggable.
+    <Box>
+      <Box ref={containerRef} sx={{ width: '100%' }}>
+        <Box sx={{ marginBottom: '10px' }}>
+          <label>Zoom: </label>
+          <input type="range" min="0.1" max="5" step="0.01" value={zoom} onChange={handleZoomChange} />
+          <span>{zoom.toFixed(2)}</span>
+        </Box>
+        <Stage
+          width={stageDimensions.width}
+          height={stageDimensions.height}
+          ref={stageRef}
+          scaleX={zoom}
+          scaleY={zoom}
+          onClick={handleStageClick}
+          onWheel={handleWheel}
+          style={{ border: '1px solid grey' }}
+        >
+          <Layer>
+            {/* The Group for the image and crop polygon is draggable.
               Its onDragEnd updates imagePosition, and all crop points are stored relative to it. */}
-          <Group
-            ref={groupRef}
-            x={imagePosition.x}
-            y={imagePosition.y}
-            draggable
-            onDragEnd={(e) => {
-              setImagePosition(e.target.position());
-            }}
-          >
-            <Image image={img} x={0} y={0} ref={imageRef} />
-            {polygonPoints.length > 0 && (
-              <>
-                {/* Filled polygon with red color and 0.3 opacity */}
-                <Line points={polygonPoints.flatMap((p) => [p.x, p.y])} fill="red" closed={true} opacity={0.3} />
-                {/* Stroke for the polygon */}
-                <Line points={polygonPoints.flatMap((p) => [p.x, p.y])} stroke="red" strokeWidth={2} closed={true} />
-              </>
-            )}
-            {polygonPoints.map((point, index) => (
-              <Circle key={index} x={point.x} y={point.y} radius={4} fill="blue" />
-            ))}
-          </Group>
-          <Transformer ref={transformerRef} />
-        </Layer>
-      </Stage>
-      {/* MUI Crop Icon Button to toggle cropping mode */}
-      <button
-        onClick={toggleCropping}
-        style={{
-          marginTop: '10px',
-          display: 'flex',
-          alignItems: 'center',
-          padding: '5px 10px',
-          fontSize: '16px',
-          cursor: 'pointer',
-        }}
-      >
-        <CropIcon style={{ marginRight: '5px' }} />
-        {isCropping ? 'Apply Crop' : 'Start Cropping'}
-      </button>
-    </div>
+            <Group
+              ref={groupRef}
+              x={imagePosition.x}
+              y={imagePosition.y}
+              draggable
+              onDragEnd={(e) => {
+                setImagePosition(e.target.position());
+              }}
+            >
+              <Image image={img} x={0} y={0} ref={imageRef} />
+              {polygonPoints.length > 0 && (
+                <>
+                  {/* Filled polygon with red color and 0.3 opacity */}
+                  <Line points={polygonPoints.flatMap((p) => [p.x, p.y])} fill="red" closed={true} opacity={0.3} />
+                  {/* Stroke for the polygon */}
+                  <Line points={polygonPoints.flatMap((p) => [p.x, p.y])} stroke="red" strokeWidth={2} closed={true} />
+                </>
+              )}
+              {polygonPoints.map((point, index) => (
+                <Circle key={index} x={point.x} y={point.y} radius={4} fill="blue" />
+              ))}
+            </Group>
+            <Transformer ref={transformerRef} />
+          </Layer>
+        </Stage>
+        {/* MUI Crop Icon Button to toggle cropping mode */}
+        <button
+          onClick={toggleCropping}
+          style={{
+            marginTop: '10px',
+            display: 'flex',
+            alignItems: 'center',
+            padding: '5px 10px',
+            fontSize: '16px',
+            cursor: 'pointer',
+          }}
+        >
+          <CropIcon style={{ marginRight: '5px' }} />
+          {isCropping ? 'Apply Crop' : 'Start Cropping'}
+        </button>
+      </Box>
+
+      <Box sx={{ display: 'flex' }}>
+        <Box>{croppedImage && <DetailPreview image={croppedImage} />}</Box>
+        <Box>
+          {croppedImage && (
+            <DetailPreview
+              image={croppedImage}
+              highlightArea={{
+                x: '150px',
+                y: '30px',
+                width: '50px',
+                height: '30px',
+              }}
+              sx={{
+                marginLeft: '50px',
+              }}
+            />
+          )}
+        </Box>
+      </Box>
+    </Box>
   );
 };
 
