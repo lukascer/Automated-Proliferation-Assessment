@@ -3,9 +3,9 @@ import React from 'react';
 
 const Notifications = () => {
   const notifications = [
-    { id: 1, message: 'Increase in proliferation.' },
-    { id: 1, message: 'High risk feature.' },
-    { id: 2, message: 'Previous sample available.' },
+    { id: 1, message: 'Increase in proliferation.', alert: 'red' },
+    { id: 1, message: 'High risk feature.', alert: 'yellow' },
+    { id: 2, message: 'Previous sample available.', alert: null },
     // { id: 3, message: 'New sample available.' },
   ];
 
@@ -17,7 +17,12 @@ const Notifications = () => {
         </Typography>
         <List>
           {notifications.map((notification) => (
-            <ListItem key={notification.id}>
+            <ListItem
+              key={notification.id}
+              sx={{
+                backgroundColor: notification.alert ?? 'none',
+              }}
+            >
               <ListItemText primary={notification.message} />
             </ListItem>
           ))}
