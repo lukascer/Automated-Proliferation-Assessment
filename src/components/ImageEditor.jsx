@@ -57,14 +57,17 @@ const ImageEditor = () => {
     }
   }, [img]);
 
+  useEffect(() => {
+    console.log('polygonPoints changed: ', polygonPoints);
+  }, [polygonPoints]);
+
   // When cropping mode is active, record polygon points on stage clicks
   const handleStageClick = (e) => {
     if (!isCropping) return;
-    if (e.target === e.target.getStage()) {
-      const stage = e.target.getStage();
-      const point = stage.getPointerPosition();
-      setPolygonPoints((prev) => [...prev, point]);
-    }
+
+    const stage = e.target.getStage();
+    const point = stage.getPointerPosition();
+    setPolygonPoints((prev) => [...prev, point]);
   };
 
   // Handle zoom slider change
