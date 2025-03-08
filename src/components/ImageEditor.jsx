@@ -6,7 +6,9 @@ import { Box, Button } from '@mui/material';
 import React, { useEffect, useRef, useState } from 'react';
 import { Circle, Group, Image, Layer, Line, Stage, Transformer } from 'react-konva';
 import DetailPreview from './DetailPreview';
+import EvaluatingForm from './EvaluatingForm';
 import ImageUpload from './ImageUpload';
+import MeasurementsTable from './MeasurementsTable';
 import { useSidebar } from './SidebarContext';
 
 const ImageEditor = () => {
@@ -289,7 +291,16 @@ const ImageEditor = () => {
         )}
       </Box>
 
-      <Box sx={{ display: 'flex', maxWidth: '100%', width: '100%', margin: '10px 0', justifyContent: 'space-between' }}>
+      <Box
+        sx={{
+          display: 'flex',
+          maxWidth: '100%',
+          width: '100%',
+          height: '200px',
+          margin: '10px 0',
+          justifyContent: 'space-between',
+        }}
+      >
         <Box sx={{ border: '1px solid grey', borderRight: 'none', width: '50%' }}>
           {croppedImage && <DetailPreview image={croppedImage} sx={{ width: '100%', height: '100%' }} />}
         </Box>
@@ -312,6 +323,16 @@ const ImageEditor = () => {
           )}
         </Box>
       </Box>
+
+      {croppedImage ? (
+        <>
+          <Box component="h2" textAlign="center">
+            Cells details
+          </Box>
+          <MeasurementsTable />
+          <EvaluatingForm />
+        </>
+      ) : null}
     </Box>
   );
 };
