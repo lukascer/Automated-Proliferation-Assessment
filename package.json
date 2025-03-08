@@ -19,6 +19,7 @@
     "react": "^19.0.0",
     "react-d3-tree": "^3.6.6",
     "react-dom": "^19.0.0",
+    "react-dropzone": "^14.3.8",
     "react-konva": "^19.0.3",
     "react-new-window": "^1.0.1",
     "react-router-dom": "^7.2.0",

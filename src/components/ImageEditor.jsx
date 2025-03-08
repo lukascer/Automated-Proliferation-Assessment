@@ -2,8 +2,8 @@ import CropIcon from '@mui/icons-material/Crop';
 import { Box } from '@mui/material';
 import React, { useEffect, useRef, useState } from 'react';
 import { Circle, Group, Image, Layer, Line, Stage, Transformer } from 'react-konva';
-import exampleImage from './../assets/6246_23_A_Ki67.png';
 import DetailPreview from './DetailPreview';
+import ImageUpload from './ImageUpload';
 
 const ImageEditor = () => {
   const containerRef = useRef(null);
@@ -37,13 +37,31 @@ const ImageEditor = () => {
   }, []);
 
   // Load the image.
-  useEffect(() => {
+  // useEffect(() => {
+  //   const imageObj = new window.Image();
+  //   imageObj.src = exampleImage;
+  //   imageObj.onload = () => {
+  //     setImg(imageObj);
+  //   };
+  // }, []);
+
+  const handleImageUpload = (newImgSrc) => {
+    console.log('handleImageUpload: ', newImgSrc);
+
+    // const formData = new FormData();
+    // formData.append('image', newImgSrc);
+
+    const imageUrl = URL.createObjectURL(newImgSrc);
     const imageObj = new window.Image();
-    imageObj.src = exampleImage;
+    imageObj.src = imageUrl;
     imageObj.onload = () => {
+      console.log('imageObj: ', imageObj);
       setImg(imageObj);
+
+      // Revoke the object URL to free up memory once done
+      URL.revokeObjectURL(imageUrl);
     };
-  }, []);
+  };
 
   // Compute initial zoom and center the image on load.
   useEffect(() => {
@@ -202,44 +220,60 @@ const ImageEditor = () => {
             {isCropping ? 'Apply Crop' : 'Start Cropping'}
           </button>
         </Box>
-        <Stage
-          width={stageDimensions.width}
-          height={stageDimensions.height}
-          ref={stageRef}
-          scaleX={zoom}
-          scaleY={zoom}
-          onClick={handleStageClick}
-          onWheel={handleWheel}
-          style={{ border: '1px solid grey' }}
-        >
-          <Layer>
-            {/* The Group for the image and crop polygon is draggable.
+
+        {!img ? (
+          <ImageUpload
+            onImageUpload={handleImageUpload}
+            sx={{
+              width: stageDimensions.width,
+              height: stageDimensions.height,
+            }}
+          />
+        ) : (
+          <Stage
+            width={stageDimensions.width}
+            height={stageDimensions.height}
+            ref={stageRef}
+            scaleX={zoom}
+            scaleY={zoom}
+            onClick={handleStageClick}
+            onWheel={handleWheel}
+            style={{ border: '1px solid grey' }}
+          >
+            <Layer>
+              {/* The Group for the image and crop polygon is draggable.
               Its onDragEnd updates imagePosition, and all crop points are stored relative to it. */}
-            <Group
-              ref={groupRef}
-              x={imagePosition.x}
-              y={imagePosition.y}
-              draggable
-              onDragEnd={(e) => {
-                setImagePosition(e.target.position());
-              }}
-            >
-              <Image image={img} x={0} y={0} ref={imageRef} />
-              {polygonPoints.length > 0 && (
-                <>
-                  {/* Filled polygon with red color and 0.3 opacity */}
-                  <Line points={polygonPoints.flatMap((p) => [p.x, p.y])} fill="red" closed={true} opacity={0.3} />
-                  {/* Stroke for the polygon */}
-                  <Line points={polygonPoints.flatMap((p) => [p.x, p.y])} stroke="red" strokeWidth={2} closed={true} />
-                </>
-              )}
-              {polygonPoints.map((point, index) => (
-                <Circle key={index} x={point.x} y={point.y} radius={4} fill="blue" />
-              ))}
-            </Group>
-            <Transformer ref={transformerRef} />
-          </Layer>
-        </Stage>
+              <Group
+                ref={groupRef}
+                x={imagePosition.x}
+                y={imagePosition.y}
+                draggable
+                onDragEnd={(e) => {
+                  setImagePosition(e.target.position());
+                }}
+              >
+                <Image image={img} x={0} y={0} ref={imageRef} />
+                {polygonPoints.length > 0 && (
+                  <>
+                    {/* Filled polygon with red color and 0.3 opacity */}
+                    <Line points={polygonPoints.flatMap((p) => [p.x, p.y])} fill="red" closed={true} opacity={0.3} />
+                    {/* Stroke for the polygon */}
+                    <Line
+                      points={polygonPoints.flatMap((p) => [p.x, p.y])}
+                      stroke="red"
+                      strokeWidth={2}
+                      closed={true}
+                    />
+                  </>
+                )}
+                {polygonPoints.map((point, index) => (
+                  <Circle key={index} x={point.x} y={point.y} radius={4} fill="blue" />
+                ))}
+              </Group>
+              <Transformer ref={transformerRef} />
+            </Layer>
+          </Stage>
+        )}
       </Box>
 
       <Box sx={{ display: 'flex', maxWidth: '100%', width: '100%', margin: '10px 0', justifyContent: 'space-between' }}>
