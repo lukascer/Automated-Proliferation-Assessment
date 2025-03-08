@@ -1,5 +1,5 @@
 import React from 'react';
-import ReactFlow, { ReactFlowProvider, Controls, Background } from 'reactflow';
+import ReactFlow, { Background, Controls, ReactFlowProvider } from 'reactflow';
 import 'reactflow/dist/style.css';
 
 // Default node style using the primary color (#ff0071)
@@ -26,15 +26,15 @@ const highlightedEdgeStyle = {
   strokeWidth: 3,
 };
 
-// Titanic Decision Tree Example Data with three levels
+// Neuroendocrine Tumor Decision Tree Data
 const initialNodes = [
-  { id: '1', data: { label: 'Titanic Survival' }, position: { x: 300, y: 0 }, style: nodeStyle },
-  { id: '2', data: { label: 'Female' }, position: { x: 150, y: 150 }, style: nodeStyle },
-  { id: '3', data: { label: 'Male' }, position: { x: 450, y: 150 }, style: nodeStyle },
-  { id: '4', data: { label: 'Pclass 1 or 2' }, position: { x: 0, y: 300 }, style: nodeStyle },
-  { id: '5', data: { label: 'Pclass 3' }, position: { x: 200, y: 300 }, style: nodeStyle },
-  { id: '6', data: { label: 'Age < 10' }, position: { x: 400, y: 300 }, style: nodeStyle },
-  { id: '7', data: { label: 'Age >= 10' }, position: { x: 600, y: 300 }, style: nodeStyle },
+  { id: '1', data: { label: 'Neuroendocrine Tumor' }, position: { x: 300, y: 0 }, style: nodeStyle },
+  { id: '2', data: { label: 'Well-Differentiated' }, position: { x: 150, y: 150 }, style: nodeStyle },
+  { id: '3', data: { label: 'Poorly-Differentiated' }, position: { x: 450, y: 150 }, style: nodeStyle },
+  { id: '4', data: { label: 'Localized Disease' }, position: { x: 0, y: 300 }, style: nodeStyle },
+  { id: '5', data: { label: 'Regional Disease' }, position: { x: 200, y: 300 }, style: nodeStyle },
+  { id: '6', data: { label: 'Metastatic: Low-Grade' }, position: { x: 400, y: 300 }, style: nodeStyle },
+  { id: '7', data: { label: 'Metastatic: High-Grade' }, position: { x: 600, y: 300 }, style: nodeStyle },
 ];
 
 const initialEdges = [
