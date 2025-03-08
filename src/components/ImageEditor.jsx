@@ -66,7 +66,7 @@ const ImageEditor = () => {
     if (!isCropping) return;
     const stage = e.target.getStage();
     const pointer = stage.getPointerPosition();
-    // Use the group's absolute transform to convert the pointer from stage coordinates to local coordinates.
+    // Convert the pointer from stage coordinates to the group's local coordinates.
     const transform = groupRef.current.getAbsoluteTransform().copy();
     transform.invert();
     const relativePoint = transform.point(pointer);
@@ -185,9 +185,13 @@ const ImageEditor = () => {
             }}
           >
             <Image image={img} x={0} y={0} ref={imageRef} />
-            {/* Render the crop polygon inside the group, with closed path visualization */}
             {polygonPoints.length > 0 && (
-              <Line points={polygonPoints.flatMap((p) => [p.x, p.y])} stroke="red" strokeWidth={2} closed={true} />
+              <>
+                {/* Filled polygon with red color and 0.3 opacity */}
+                <Line points={polygonPoints.flatMap((p) => [p.x, p.y])} fill="red" closed={true} opacity={0.3} />
+                {/* Stroke for the polygon */}
+                <Line points={polygonPoints.flatMap((p) => [p.x, p.y])} stroke="red" strokeWidth={2} closed={true} />
+              </>
             )}
             {polygonPoints.map((point, index) => (
               <Circle key={index} x={point.x} y={point.y} radius={4} fill="blue" />
