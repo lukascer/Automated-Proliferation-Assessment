@@ -2,11 +2,11 @@ import { Card, CardContent, List, ListItem, ListItemText, Typography } from '@mu
 import React from 'react';
 
 const Notifications = () => {
-  // Příkladová data notifikací
   const notifications = [
-    { id: 1, message: 'Organ donor.' },
+    { id: 1, message: 'Increase in proliferation.' },
+    { id: 1, message: 'High risk feature.' },
     { id: 2, message: 'Previous sample available.' },
-    { id: 3, message: 'New sample available.' },
+    // { id: 3, message: 'New sample available.' },
   ];
 
   return (
