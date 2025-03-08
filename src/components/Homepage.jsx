@@ -12,8 +12,8 @@ import {
 } from '@mui/material';
 import React from 'react';
 import DecisionTreeVisualization4 from './DecisionTreeVisualization4';
+import EvaluatingForm from './EvaluatingForm';
 import Notifications from './Notifications';
-import SensorDataFromBackend from './SensorDataFromBackend';
 
 const sampleMeasurementInfo = {
   group: 'For extraction',
@@ -134,8 +134,12 @@ const Homepage = () => {
       </Box>
 
       <Box sx={{ mt: 2 }}>
-        <SensorDataFromBackend />
+        <EvaluatingForm />
       </Box>
+
+      {/* <Box sx={{ mt: 2 }}>
+        <SensorDataFromBackend />
+      </Box> */}
     </Box>
   );
 };

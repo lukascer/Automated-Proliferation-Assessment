@@ -10,7 +10,7 @@ const Notifications = () => {
   ];
 
   return (
-    <Card sx={{ m: 2, p: 2 }}>
+    <Card sx={{ mb: 2, mt: 2, p: 2 }}>
       <CardContent>
         <Typography variant="h5" sx={{ mb: 2 }}>
           Notification
