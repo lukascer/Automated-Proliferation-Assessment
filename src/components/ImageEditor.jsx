@@ -6,17 +6,20 @@ import exampleImage from './../assets/6246_23_A_Ki67.png';
 const ImageEditor = () => {
   const containerRef = useRef(null);
   const stageRef = useRef(null);
+  const groupRef = useRef(null);
   const imageRef = useRef(null);
   const transformerRef = useRef(null);
 
   const [img, setImg] = useState(null);
+  // Crop polygon points stored in the group's local coordinate system.
   const [polygonPoints, setPolygonPoints] = useState([]);
   const [zoom, setZoom] = useState(1);
   const [stageDimensions, setStageDimensions] = useState({ width: 800, height: 600 });
+  // imagePosition holds the group's absolute position (initial centering).
   const [imagePosition, setImagePosition] = useState({ x: 0, y: 0 });
   const [isCropping, setIsCropping] = useState(false);
 
-  // Update stage dimensions based on container size
+  // Update stage dimensions based on container size.
   useEffect(() => {
     const updateDimensions = () => {
       if (containerRef.current) {
@@ -29,7 +32,7 @@ const ImageEditor = () => {
     return () => window.removeEventListener('resize', updateDimensions);
   }, []);
 
-  // Load the image
+  // Load the image.
   useEffect(() => {
     const imageObj = new window.Image();
     imageObj.src = exampleImage;
@@ -38,18 +41,19 @@ const ImageEditor = () => {
     };
   }, []);
 
-  // Compute initial zoom and center the image on load
+  // Compute initial zoom and center the image on load.
   useEffect(() => {
     if (img && stageDimensions.width && stageDimensions.height) {
       const initialScale = Math.min(stageDimensions.width / img.width, stageDimensions.height / img.height);
       setZoom(initialScale);
+      // Center the image by computing the group's position in stage coordinates.
       const x = (stageDimensions.width / initialScale - img.width) / 2;
       const y = (stageDimensions.height / initialScale - img.height) / 2;
       setImagePosition({ x, y });
     }
   }, [img, stageDimensions]);
 
-  // Attach transformer to the image
+  // Attach transformer to the image.
   useEffect(() => {
     if (transformerRef.current && imageRef.current) {
       transformerRef.current.nodes([imageRef.current]);
@@ -57,25 +61,24 @@ const ImageEditor = () => {
     }
   }, [img]);
 
-  useEffect(() => {
-    console.log('polygonPoints changed: ', polygonPoints);
-  }, [polygonPoints]);
-
-  // When cropping mode is active, record polygon points on stage clicks
+  // When cropping mode is active, record polygon points in the Group’s local coordinate system.
   const handleStageClick = (e) => {
     if (!isCropping) return;
-
     const stage = e.target.getStage();
-    const point = stage.getPointerPosition();
-    setPolygonPoints((prev) => [...prev, point]);
+    const pointer = stage.getPointerPosition();
+    // Use the group's absolute transform to convert the pointer from stage coordinates to local coordinates.
+    const transform = groupRef.current.getAbsoluteTransform().copy();
+    transform.invert();
+    const relativePoint = transform.point(pointer);
+    setPolygonPoints((prev) => [...prev, relativePoint]);
   };
 
-  // Handle zoom slider change
+  // Handle zoom slider change.
   const handleZoomChange = (e) => {
     setZoom(parseFloat(e.target.value));
   };
 
-  // Handle mouse wheel zoom
+  // Handle mouse wheel zoom.
   const handleWheel = (e) => {
     e.evt.preventDefault();
     const stage = stageRef.current;
@@ -97,13 +100,13 @@ const ImageEditor = () => {
     stage.batchDraw();
   };
 
-  // Compute bounding box from polygon points, clamp to image boundaries, and crop
+  // Compute bounding box from polygon points (local coordinates), clamp it to image boundaries,
+  // then convert that bounding box to stage coordinates using the group's absolute transform.
   const performCrop = () => {
     if (polygonPoints.length === 0) {
       alert('No crop area defined!');
       return;
     }
-    // Compute bounding box of drawn polygon (in stage coordinates)
     const xs = polygonPoints.map((p) => p.x);
     const ys = polygonPoints.map((p) => p.y);
     const minX = Math.min(...xs);
@@ -111,48 +114,38 @@ const ImageEditor = () => {
     const maxX = Math.max(...xs);
     const maxY = Math.max(...ys);
 
-    // Image boundaries in stage coordinates
-    const imageLeft = imagePosition.x;
-    const imageTop = imagePosition.y;
-    const imageRight = imagePosition.x + img.width;
-    const imageBottom = imagePosition.y + img.height;
-
-    // Clamp the crop region so it doesn't exceed the image boundaries
-    const clampedMinX = Math.max(minX, imageLeft);
-    const clampedMinY = Math.max(minY, imageTop);
-    const clampedMaxX = Math.min(maxX, imageRight);
-    const clampedMaxY = Math.min(maxY, imageBottom);
+    // Clamp to image boundaries (local coordinates).
+    const clampedMinX = Math.max(minX, 0);
+    const clampedMinY = Math.max(minY, 0);
+    const clampedMaxX = Math.min(maxX, img.width);
+    const clampedMaxY = Math.min(maxY, img.height);
     const cropWidth = clampedMaxX - clampedMinX;
     const cropHeight = clampedMaxY - clampedMinY;
-
-    console.log({
-      minX,
-      minY,
-      maxX,
-      maxY,
-      clampedMinX,
-      clampedMinY,
-      clampedMaxX,
-      clampedMaxY,
-      cropWidth,
-      cropHeight,
-    });
 
     if (cropWidth <= 0 || cropHeight <= 0) {
       alert('Invalid crop area!');
       return;
     }
 
-    // Hide transformer handles before cropping
+    // Convert the top-left corner from local (group) coordinates to stage coordinates.
+    const groupTransform = groupRef.current.getAbsoluteTransform();
+    const topLeft = groupTransform.point({ x: clampedMinX, y: clampedMinY });
+
+    console.log({
+      local: { minX, minY, maxX, maxY, cropWidth, cropHeight },
+      clamped: { clampedMinX, clampedMinY, clampedMaxX, clampedMaxY },
+      absolute: topLeft,
+    });
+
+    // Hide transformer handles before cropping.
     if (transformerRef.current) {
       transformerRef.current.hide();
       transformerRef.current.getLayer().batchDraw();
     }
 
-    // Crop using stage.toDataURL with the clamped region (coordinates in stage space)
     const dataURL = stageRef.current.toDataURL({
-      x: clampedMinX,
-      y: clampedMinY,
+      x: topLeft.x,
+      y: topLeft.y,
       width: cropWidth,
       height: cropHeight,
       pixelRatio: 3,
@@ -196,18 +189,26 @@ const ImageEditor = () => {
         style={{ border: '1px solid grey' }}
       >
         <Layer>
-          {/* The image is drawn with an offset (imagePosition) */}
-          <Group>
-            <Image image={img} x={imagePosition.x} y={imagePosition.y} draggable ref={imageRef} />
+          {/* The image and crop polygon are inside a draggable Group. */}
+          <Group
+            ref={groupRef}
+            x={imagePosition.x}
+            y={imagePosition.y}
+            draggable
+            onDragEnd={(e) => {
+              setImagePosition(e.target.position());
+            }}
+          >
+            <Image image={img} x={0} y={0} ref={imageRef} />
+            {/* Draw the crop polygon inside the group */}
+            {polygonPoints.length > 0 && (
+              <Line points={polygonPoints.flatMap((p) => [p.x, p.y])} stroke="red" strokeWidth={2} closed={false} />
+            )}
+            {polygonPoints.map((point, index) => (
+              <Circle key={index} x={point.x} y={point.y} radius={4} fill="blue" />
+            ))}
           </Group>
           <Transformer ref={transformerRef} />
-          {/* Visualize the drawn crop polygon */}
-          {polygonPoints.length > 0 && (
-            <Line points={polygonPoints.flatMap((p) => [p.x, p.y])} stroke="red" strokeWidth={2} closed={false} />
-          )}
-          {polygonPoints.map((point, index) => (
-            <Circle key={index} x={point.x} y={point.y} radius={4} fill="blue" />
-          ))}
         </Layer>
       </Stage>
       {/* MUI Crop Icon Button to toggle cropping mode */}
