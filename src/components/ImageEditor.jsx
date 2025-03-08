@@ -100,6 +100,18 @@ const ImageEditor = () => {
     stage.batchDraw();
   };
 
+  const dataURLToBlob = (dataURL) => {
+    const parts = dataURL.split(',');
+    const mime = parts[0].match(/:(.*?);/)[1];
+    const bstr = atob(parts[1]);
+    let n = bstr.length;
+    const u8arr = new Uint8Array(n);
+    while (n--) {
+      u8arr[n] = bstr.charCodeAt(n);
+    }
+    return new Blob([u8arr], { type: mime });
+  };
+
   // Compute bounding box from polygon points (local coordinates), create a clipping mask on an offscreen canvas, and crop.
   const performCrop = () => {
     if (polygonPoints.length === 0) {
@@ -139,7 +151,10 @@ const ImageEditor = () => {
     ctx.drawImage(img, -minX, -minY);
 
     const dataURL = canvas.toDataURL('image/png');
-    window.open(dataURL);
+    // Convert the dataURL to a Blob and then create a Blob URL.
+    const blob = dataURLToBlob(dataURL);
+    const blobUrl = URL.createObjectURL(blob);
+    window.open(blobUrl);
   };
 
   // Toggle cropping mode:
