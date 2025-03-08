@@ -4,8 +4,8 @@ import React from 'react';
 const Notifications = () => {
   const notifications = [
     { id: 1, message: 'Increase in proliferation.', alert: 'red' },
-    { id: 1, message: 'High risk feature.', alert: 'yellow' },
-    { id: 2, message: 'Previous sample available.', alert: null },
+    { id: 2, message: 'High risk feature.', alert: 'yellow' },
+    { id: 3, message: 'Previous sample available.', alert: null },
     // { id: 3, message: 'New sample available.' },
   ];
 
