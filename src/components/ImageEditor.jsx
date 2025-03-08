@@ -176,17 +176,31 @@ const ImageEditor = () => {
     }
   };
 
-  // useEffect(() => {
-
-  // }, [croppedImage])
-
   return (
     <Box>
       <Box ref={containerRef} sx={{ width: '100%' }}>
-        <Box sx={{ marginBottom: '10px' }}>
-          <label>Zoom: </label>
-          <input type="range" min="0.1" max="5" step="0.01" value={zoom} onChange={handleZoomChange} />
-          <span>{zoom.toFixed(2)}</span>
+        <Box sx={{ display: 'flex', gap: '20px', alignContent: 'center', alignItems: 'center' }}>
+          <Box sx={{ marginBottom: '10px' }}>
+            <label>Zoom: </label>
+            <input type="range" min="0.1" max="5" step="0.01" value={zoom} onChange={handleZoomChange} />
+            <span>{zoom.toFixed(2)}</span>
+          </Box>
+
+          {/* MUI Crop Icon Button to toggle cropping mode */}
+          <button
+            onClick={toggleCropping}
+            style={{
+              marginBottom: '13px',
+              display: 'flex',
+              alignItems: 'center',
+              padding: '5px 10px',
+              fontSize: '16px',
+              cursor: 'pointer',
+            }}
+          >
+            <CropIcon style={{ marginRight: '5px' }} />
+            {isCropping ? 'Apply Crop' : 'Start Cropping'}
+          </button>
         </Box>
         <Stage
           width={stageDimensions.width}
@@ -226,26 +240,13 @@ const ImageEditor = () => {
             <Transformer ref={transformerRef} />
           </Layer>
         </Stage>
-        {/* MUI Crop Icon Button to toggle cropping mode */}
-        <button
-          onClick={toggleCropping}
-          style={{
-            marginTop: '10px',
-            display: 'flex',
-            alignItems: 'center',
-            padding: '5px 10px',
-            fontSize: '16px',
-            cursor: 'pointer',
-          }}
-        >
-          <CropIcon style={{ marginRight: '5px' }} />
-          {isCropping ? 'Apply Crop' : 'Start Cropping'}
-        </button>
       </Box>
 
-      <Box sx={{ display: 'flex' }}>
-        <Box>{croppedImage && <DetailPreview image={croppedImage} />}</Box>
-        <Box>
+      <Box sx={{ display: 'flex', maxWidth: '100%', width: '100%', margin: '10px 0', justifyContent: 'space-between' }}>
+        <Box sx={{ border: '1px solid grey', borderRight: 'none', width: '50%' }}>
+          {croppedImage && <DetailPreview image={croppedImage} sx={{ width: '100%', height: '100%' }} />}
+        </Box>
+        <Box sx={{ border: '1px solid grey', width: '50%' }}>
           {croppedImage && (
             <DetailPreview
               image={croppedImage}
@@ -257,6 +258,8 @@ const ImageEditor = () => {
               }}
               sx={{
                 marginLeft: '50px',
+                width: '100%',
+                height: '100%',
               }}
             />
           )}
