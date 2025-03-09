@@ -307,12 +307,13 @@ const ImageEditor = () => {
         <Box sx={{ border: '1px solid grey', width: '50%' }}>
           {croppedImage && (
             <DetailPreview
-              image={croppedImage}
+              // image={croppedImage}
+              image="http://127.0.0.1:8000/image"
               highlightArea={{
-                x: '150px',
-                y: '30px',
-                width: '50px',
-                height: '30px',
+                x: '730px',
+                y: '262px',
+                width: '330px',
+                height: '401px',
               }}
               sx={{
                 marginLeft: '50px',
@@ -333,6 +334,8 @@ const ImageEditor = () => {
           <EvaluatingForm />
         </>
       ) : null}
+
+      {/* <img src="http://127.0.0.1:8000/image" alt="Displayed from backend" /> */}
     </Box>
   );
 };
