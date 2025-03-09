@@ -6,7 +6,7 @@ import MeasurementsTable from './MeasurementsTable';
 import Notifications from './Notifications';
 
 const sampleMeasurementInfo = {
-  group: 'For extraction',
+  group: 'Low-Grade',
   dateTime: '2023-03-16 10:30',
   patientName: 'Jan Novák',
 };
