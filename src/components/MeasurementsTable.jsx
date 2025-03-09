@@ -2,18 +2,18 @@ import { Paper, Table, TableBody, TableCell, TableContainer, TableHead, TableRow
 
 const MeasurementsTable = () => {
   const sampleMeasurements = [
-    { id: 'positive', parameter: 'Positive cells', value: 80, unit: 80 },
-    { id: 'mild_active', parameter: '+ Mild Positive', value: 15, unit: 15 },
-    { id: 'moderate_active', parameter: '+ Moderate Positive', value: 21, unit: 21 },
-    { id: 'strong_active', parameter: '+ Strong Positive', value: 40, unit: 40 },
-    { id: 'negative', parameter: 'Negative cells', value: 53, unit: 53 },
+    { id: 'positive', parameter: 'Positive cells', value: 22, unit: 19 },
+    { id: 'mild_active', parameter: '+ Mild Positive', value: 1, unit: 1 },
+    { id: 'moderate_active', parameter: '+ Moderate Positive', value: 9, unit: 8 },
+    { id: 'strong_active', parameter: '+ Strong Positive', value: 12, unit: 11 },
+    { id: 'negative', parameter: 'Negative cells', value: 95, unit: 82 },
   ];
 
   const thresholdValues = {
-    positive: { min: 20, max: 50 },
+    positive: { min: 0, max: 15 },
     mild_active: { min: 0, max: 30 },
     moderate_active: { min: 0, max: 30 },
-    strong_active: { min: 0, max: 30 },
+    strong_active: { min: 0, max: 10 },
     negative: 53,
   };
 
@@ -43,9 +43,10 @@ const MeasurementsTable = () => {
           {sampleMeasurements.map((row, index) => (
             <TableRow key={index}>
               <TableCell>{row.parameter}</TableCell>
+              <TableCell align="right">{row.value}</TableCell>
               <TableCell
-                align="right"
                 className={checkTreshold(row.id, row.value)}
+                align="right"
                 sx={{
                   '&.lowValue': {
                     backgroundColor: 'rgba(255,255,0,0.3)',
@@ -55,9 +56,8 @@ const MeasurementsTable = () => {
                   },
                 }}
               >
-                {row.value}
+                {row.unit}
               </TableCell>
-              <TableCell align="right">{row.unit}</TableCell>
             </TableRow>
           ))}
         </TableBody>
